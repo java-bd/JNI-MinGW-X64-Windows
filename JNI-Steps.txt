@@ -1,0 +1,73 @@
+########## GNU MinGW JNI Tutorial Windows x64 ############
+
+##. Copy jni.h jni_md.h to MinGW include Directory
+
+
+ --- JniApp.java ----
+
+public class JniApp{
+    public native int factorial(int number);
+    
+    public static void main(String[] args){
+        JniApp ja = new JniApp();
+        int f = ja.factorial(5);
+        System.out.println("Factorial of 5 is : " + f);
+    }
+	/// Add Later if Not Works
+	static
+	{
+			System.loadLibrary("Factorial");
+	}
+}
+
+
+
+##. javac JniApp.java
+##. javah -jni JniApp
+
+##. JniApp.h header file contents :
+
+  JNIEXPORT jint JNICALL Java_JniApp_factorial
+  (JNIEnv *, jobject, jint);
+  
+  change it to JniApp.c by following:
+  
+  ----- Factorial.c -------
+  
+    #include <stdio.h>
+	#include "jni.h"
+    #include "JniApp.h"
+
+	JNIEXPORT jint JNICALL Java_JniApp_factorial
+	(JNIEnv *env, jobject obj, jint num)
+	{
+		int fact = 1;
+		while(num > 0){
+			fact *= num;
+			num--;        
+		}
+	}
+
+##. gcc -c Factorial.c 
+
+##. gcc -shared -o Factorial.dll Factorial.o
+
+##. Javac JniApp.java
+
+	--- JniApp.java ----
+
+	public class JniApp{
+		public native int factorial(int number);
+		
+		public static void main(String[] args){
+			JniApp ja = new JniApp();
+			int f = ja.factorial(5);
+			System.out.println("Factorial of 5 is : " + f);
+		}
+		static{
+			System.loadLibrary("Factorial");
+		}
+		
+	}
+	
+##. java JniApp
